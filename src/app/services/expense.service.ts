@@ -10,6 +10,11 @@ export interface Expense {
   description?: string;
   employeeName?: string;
   status: 'Pending' | 'Approved' | 'Rejected' | string;
+  // Optional manager-related fields (shape defined by backend)
+  managerId?: string | number;
+  managerUserId?: string | number;
+  assignedManagerId?: string | number;
+  employeeId?: string | number;
 }
 
 @Injectable({

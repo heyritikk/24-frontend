@@ -7,16 +7,19 @@
 
     <ul class="menu">
       <li [class.active]="section === 'create-budget'" (click)="setSection('create-budget')">
-        💰 Create Budget
+        Create Budget
       </li>
       <li [class.active]="section === 'view-budgets'" (click)="setSection('view-budgets')">
-        📊 View Budgets
+        Budgets
+      </li>
+      <li [class.active]="section === 'approvals'" (click)="setSection('approvals')">
+        Approvals
       </li>
       <li [class.active]="section === 'notifications'" (click)="setSection('notifications')">
-        🔔 Notifications
+        Notifications
       </li>
       <li (click)="logout()">
-        🚪 Logout
+        Logout
       </li>
     </ul>
   </aside>
@@ -25,14 +28,57 @@
   <div class="main">
 
     <header class="navbar">
-      <h3>Manager Dashboard</h3>
-      <div class="navbar-meta">
-        <span>Total Budgets: {{ budgets.length }}</span>
-        <span>Pending Expenses: {{ pendingExpensesCount }}</span>
+      <div class="navbar-left">
+        <h3>Manager Dashboard</h3>
+        <p class="navbar-subtitle">Manage budgets and approvals for your team</p>
+      </div>
+      <div class="navbar-right">
+        <div class="navbar-meta">
+          <span>Total Budgets: {{ totalBudgetsCount }}</span>
+          <span>Total Allocated: {{ totalAllocatedAmount | currency }}</span>
+          <span>Total Spent: {{ totalSpentAmount | currency }}</span>
+          <span>Over Budget: {{ overBudgetCount }}</span>
+          <span>Pending Expenses: {{ pendingExpensesCount }}</span>
+        </div>
+        <div class="profile-wrapper">
+          <button type="button" class="profile-chip" (click)="toggleProfileMenu()">
+            <div class="profile-initials">
+              {{ userName.charAt(0) | uppercase }}
+            </div>
+            <div class="profile-text">
+              <span class="profile-label">Welcome</span>
+              <span class="profile-name">{{ userName }}</span>
+            </div>
+          </button>
+          <div class="profile-menu" *ngIf="showProfileMenu">
+            <button type="button" (click)="navigateToProfile()">View Profile</button>
+            <button type="button" (click)="logout()">Logout</button>
+          </div>
+        </div>
       </div>
     </header>
 
     <div class="content">
+
+      <!-- Overview cards -->
+      <section class="summary-grid">
+        <div class="summary-card">
+          <h4>Total Budgets</h4>
+          <p class="summary-value">{{ totalBudgetsCount }}</p>
+        </div>
+        <div class="summary-card">
+          <h4>Total Allocated</h4>
+          <p class="summary-value">{{ totalAllocatedAmount | currency }}</p>
+        </div>
+        <div class="summary-card">
+          <h4>Total Spent</h4>
+          <p class="summary-value">{{ totalSpentAmount | currency }}</p>
+        </div>
+        <div class="summary-card">
+          <h4>Over Budget</h4>
+          <p class="summary-value">{{ overBudgetCount }}</p>
+        </div>
+      </section>
 
       <!-- Create Budget Page -->
       <section *ngIf="section === 'create-budget'" class="card">
@@ -113,62 +159,62 @@
             No budgets created yet.
           </div>
         </div>
+      </section>
 
-        <!-- Expense Approval Section -->
-        <div class="card">
-          <div class="card-header">
-            <h4>Expense Approvals</h4>
-          </div>
+      <!-- Approvals Tab -->
+      <section *ngIf="section === 'approvals'" class="card">
+        <div class="card-header">
+          <h4>Expense Approvals</h4>
+        </div>
 
-          <div *ngIf="isLoadingExpenses">Loading expenses...</div>
+        <div *ngIf="isLoadingExpenses">Loading expenses...</div>
 
-          <table *ngIf="!isLoadingExpenses && expenses.length" class="table">
-            <thead>
-              <tr>
-                <th>Expense Title</th>
-                <th>Amount</th>
-                <th>Employee</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let e of expenses">
-                <td>{{ e.title }}</td>
-                <td>{{ e.amount | currency }}</td>
-                <td>{{ e.employeeName || '-' }}</td>
-                <td>
-                  <span class="badge" [ngClass]="{
-                    'badge-pending': e.status === 'Pending',
-                    'badge-approved': e.status === 'Approved',
-                    'badge-rejected': e.status === 'Rejected'
-                  }">
-                    {{ e.status }}
-                  </span>
-                </td>
-                <td class="actions">
-                  <button
-                    type="button"
-                    class="primary-btn"
-                    (click)="approveExpense(e)"
-                    [disabled]="e.status === 'Approved'">
-                    Approve
-                  </button>
-                  <button
-                    type="button"
-                    class="danger-outline-btn"
-                    (click)="rejectExpense(e)"
-                    [disabled]="e.status === 'Rejected'">
-                    Reject
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <table *ngIf="!isLoadingExpenses && managerExpenses.length" class="table">
+          <thead>
+            <tr>
+              <th>Expense Title</th>
+              <th>Amount</th>
+              <th>Employee</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of managerExpenses">
+              <td>{{ e.title }}</td>
+              <td>{{ e.amount | currency }}</td>
+              <td>{{ e.employeeName || '-' }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'badge-pending': e.status === 'Pending',
+                  'badge-approved': e.status === 'Approved',
+                  'badge-rejected': e.status === 'Rejected'
+                }">
+                  {{ e.status }}
+                </span>
+              </td>
+              <td class="actions">
+                <button
+                  type="button"
+                  class="primary-btn"
+                  (click)="approveExpense(e)"
+                  [disabled]="e.status === 'Approved'">
+                  Approve
+                </button>
+                <button
+                  type="button"
+                  class="danger-outline-btn"
+                  (click)="rejectExpense(e)"
+                  [disabled]="e.status === 'Rejected'">
+                  Reject
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-          <div *ngIf="!isLoadingExpenses && !expenses.length" class="empty-state">
-            No expenses submitted yet.
-          </div>
+        <div *ngIf="!isLoadingExpenses && !managerExpenses.length" class="empty-state">
+          No expenses assigned to you yet.
         </div>
       </section>
 

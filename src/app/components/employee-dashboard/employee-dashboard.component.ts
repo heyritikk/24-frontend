@@ -25,6 +25,11 @@ export class EmployeeDashboardComponent implements OnInit {
   expenses: Expense[] = [];
   notifications: NotificationItem[] = [];
 
+  userName: string = '';
+  showProfileMenu = false;
+  toastMessage: string | null = null;
+  toastType: 'success' | 'error' | null = null;
+
   expenseForm!: FormGroup;
   editExpenseForm!: FormGroup;
   isLoadingExpenses = false;
@@ -39,6 +44,7 @@ export class EmployeeDashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.userName = this.authService.getUserName() || 'Employee';
     this.buildForms();
     this.loadExpenses();
   }
@@ -63,6 +69,7 @@ export class EmployeeDashboardComponent implements OnInit {
 
   setSection(name: string) {
     this.section = name;
+    this.showProfileMenu = false;
   }
 
   loadExpenses() {
@@ -92,9 +99,10 @@ export class EmployeeDashboardComponent implements OnInit {
         this.loadExpenses();
         this.expenseForm.reset();
         this.section = 'view-expenses';
+        this.showToast('Expense created successfully.', 'success');
       },
       error: () => {
-        // optional: surface error to user
+        this.showToast('Failed to create expense.', 'error');
       }
     });
   }
@@ -127,9 +135,10 @@ export class EmployeeDashboardComponent implements OnInit {
       next: () => {
         this.loadExpenses();
         this.closeEditModal();
+        this.showToast('Expense updated successfully.', 'success');
       },
       error: () => {
-        // optional: surface error
+        this.showToast('Failed to update expense.', 'error');
       }
     });
   }
@@ -142,6 +151,7 @@ export class EmployeeDashboardComponent implements OnInit {
     this.expenseService.deleteExpense(id).subscribe({
       next: () => {
         this.loadExpenses();
+        this.showToast('Expense deleted.', 'success');
       }
     });
   }
@@ -161,5 +171,23 @@ export class EmployeeDashboardComponent implements OnInit {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  toggleProfileMenu() {
+    this.showProfileMenu = !this.showProfileMenu;
+  }
+
+  navigateToProfile() {
+    this.showProfileMenu = false;
+  }
+
+  private showToast(message: string, type: 'success' | 'error') {
+    this.toastMessage = message;
+    this.toastType = type;
+
+    setTimeout(() => {
+      this.toastMessage = null;
+      this.toastType = null;
+    }, 2500);
   }
 }

@@ -6,16 +6,16 @@
 
     <ul class="menu">
       <li [class.active]="section === 'create-expense'" (click)="setSection('create-expense')">
-        ➕ Create Expense
+        Create Expense
       </li>
       <li [class.active]="section === 'view-expenses'" (click)="setSection('view-expenses')">
-        📄 View Expenses
+        View Expenses
       </li>
       <li [class.active]="section === 'notifications'" (click)="setSection('notifications')">
-        🔔 Notifications
+        Notifications
       </li>
       <li (click)="logout()">
-        🚪 Logout
+        Logout
       </li>
     </ul>
   </aside>
@@ -24,13 +24,40 @@
   <div class="main">
 
     <header class="navbar">
-      <h3>Employee Dashboard</h3>
-      <div class="navbar-meta">
-        <span>Total Expenses: {{ expenses.length }}</span>
+      <div class="navbar-left">
+        <h3>Employee Dashboard</h3>
+        <p class="navbar-subtitle">Submit and track your expenses</p>
+      </div>
+      <div class="navbar-right">
+        <div class="navbar-meta">
+          <span>Total Expenses: {{ expenses.length }}</span>
+        </div>
+        <div class="profile-wrapper">
+          <button type="button" class="profile-chip" (click)="toggleProfileMenu()">
+            <div class="profile-initials">
+              {{ userName.charAt(0) | uppercase }}
+            </div>
+            <div class="profile-text">
+              <span class="profile-label">Welcome</span>
+              <span class="profile-name">{{ userName }}</span>
+            </div>
+          </button>
+          <div class="profile-menu" *ngIf="showProfileMenu">
+            <button type="button" (click)="navigateToProfile()">View Profile</button>
+            <button type="button" (click)="logout()">Logout</button>
+          </div>
+        </div>
       </div>
     </header>
 
     <div class="content">
+
+      <div *ngIf="toastMessage" class="toast" [ngClass]="{
+        'toast-success': toastType === 'success',
+        'toast-error': toastType === 'error'
+      }">
+        {{ toastMessage }}
+      </div>
 
       <!-- Create Expense -->
       <section *ngIf="section === 'create-expense'" class="card">

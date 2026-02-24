@@ -1,0 +1,92 @@
+<div class="admin-layout">
+
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <h2 class="logo">Planera</h2>
+    </div>
+
+    <nav class="sidebar-nav">
+      <p class="section-title">Main</p>
+      <button class="nav-item active">Dashboard</button>
+
+      <p class="section-title">Management</p>
+      <button class="nav-item">User Management</button>
+      <button class="nav-item">Reports</button>
+      <button class="nav-item">System Overview</button>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="navbar">
+      <div class="navbar-left">
+        <h3>Admin Dashboard</h3>
+        <p class="navbar-subtitle">Manage budgets, expenses and users across the organization</p>
+      </div>
+      <div class="navbar-right">
+        <div class="profile-wrapper">
+          <button type="button" class="profile-chip" (click)="toggleProfileMenu()">
+            <div class="profile-initials">
+              {{ userName.charAt(0) | uppercase }}
+            </div>
+            <div class="profile-text">
+              <span class="profile-label">Welcome</span>
+              <span class="profile-name">{{ userName }}</span>
+            </div>
+          </button>
+          <div class="profile-menu" *ngIf="showProfileMenu">
+            <button type="button" (click)="navigateToProfile()">View Profile</button>
+            <button type="button" (click)="logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="summary-grid">
+        <article class="summary-card">
+          <h4>Total Budgets</h4>
+          <p class="summary-value">{{ totalBudgets }}</p>
+        </article>
+
+        <article class="summary-card">
+          <h4>Total Allocated</h4>
+          <p class="summary-value">{{ totalAllocated | currency }}</p>
+        </article>
+
+        <article class="summary-card">
+          <h4>Total Expenses</h4>
+          <p class="summary-value">{{ totalExpenses }}</p>
+        </article>
+
+        <article class="summary-card">
+          <h4>Total Spent</h4>
+          <p class="summary-value">{{ totalSpent | currency }}</p>
+        </article>
+      </section>
+
+      <section class="summary-grid secondary">
+        <article class="summary-card small">
+          <h4>Pending Expenses</h4>
+          <p class="summary-value">{{ pendingExpenses }}</p>
+        </article>
+
+        <article class="summary-card small">
+          <h4>Approved Expenses</h4>
+          <p class="summary-value">{{ approvedExpenses }}</p>
+        </article>
+
+        <article class="summary-card small">
+          <h4>Rejected Expenses</h4>
+          <p class="summary-value">{{ rejectedExpenses }}</p>
+        </article>
+      </section>
+
+      <section class="placeholder-card">
+        <h4>Reports & Activity</h4>
+        <p>Use this area to plug in charts and reports from your backend when ready.</p>
+      </section>
+    </main>
+  </div>
+
+</div>
+

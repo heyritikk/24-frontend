@@ -28,6 +28,7 @@ export class ManagerDashboardComponent implements OnInit {
 
   budgets: Budget[] = [];
   expenses: Expense[] = [];
+  managerExpenses: Expense[] = [];
   notifications: NotificationItem[] = [];
 
   pendingExpensesCount = 0;
@@ -43,8 +44,13 @@ export class ManagerDashboardComponent implements OnInit {
   showEditModal = false;
   selectedBudget: Budget | null = null;
 
+  userName: string = '';
+  showProfileMenu = false;
+
   isLoadingBudgets = false;
   isLoadingExpenses = false;
+
+  private managerUserId: string | null = null;
 
   constructor(
     private budgetService: BudgetService,
@@ -55,6 +61,8 @@ export class ManagerDashboardComponent implements OnInit {
   ){}
 
   ngOnInit(){
+    this.userName = this.authService.getUserName() || 'Manager';
+    this.managerUserId = this.authService.getUserId();
     this.buildForms();
     this.loadBudgets();
     this.loadExpenses();
@@ -78,6 +86,7 @@ export class ManagerDashboardComponent implements OnInit {
 
   setSection(name:string){
     this.section = name;
+    this.showProfileMenu = false;
   }
 
   loadBudgets(){
@@ -98,13 +107,68 @@ export class ManagerDashboardComponent implements OnInit {
     this.expenseService.getAllExpenses().subscribe({
       next: (res) => {
         this.expenses = res;
-        this.pendingExpensesCount = this.expenses.filter(e => e.status === 'Pending').length;
+        this.applyManagerExpenseFilters();
         this.isLoadingExpenses = false;
       },
       error: () => {
         this.isLoadingExpenses = false;
       }
     });
+  }
+
+  private applyManagerExpenseFilters() {
+    const managerId = this.managerUserId;
+
+    if (!managerId) {
+      this.managerExpenses = [...this.expenses];
+    } else {
+      this.managerExpenses = this.expenses.filter((raw: Expense) => {
+        const anyExpense = raw as any;
+        const candidateManagerId =
+          anyExpense.managerId ??
+          anyExpense.managerUserId ??
+          anyExpense.assignedManagerId;
+
+        if (candidateManagerId !== undefined && candidateManagerId !== null) {
+          return String(candidateManagerId) === String(managerId);
+        }
+
+        return true;
+      });
+    }
+
+    this.pendingExpensesCount = this.managerExpenses.filter(e => e.status === 'Pending').length;
+  }
+
+  get totalBudgetsCount(): number {
+    return this.budgets.length;
+  }
+
+  get totalAllocatedAmount(): number {
+    return this.budgets.reduce((sum, b) => sum + (b.amountAllocated || 0), 0);
+  }
+
+  get totalSpentAmount(): number {
+    return this.managerExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+  }
+
+  get overBudgetCount(): number {
+    const spentByBudget = new Map<number, number>();
+
+    this.managerExpenses.forEach(e => {
+      const current = spentByBudget.get(e.budgetId) || 0;
+      spentByBudget.set(e.budgetId, current + (e.amount || 0));
+    });
+
+    let count = 0;
+    this.budgets.forEach(b => {
+      const spent = spentByBudget.get(b.id) || 0;
+      if (spent > (b.amountAllocated || 0)) {
+        count++;
+      }
+    });
+
+    return count;
   }
 
   createBudget(){
@@ -208,6 +272,15 @@ export class ManagerDashboardComponent implements OnInit {
   logout(){
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  toggleProfileMenu() {
+    this.showProfileMenu = !this.showProfileMenu;
+  }
+
+  navigateToProfile() {
+    // Placeholder for future profile page route
+    this.showProfileMenu = false;
   }
 
 }

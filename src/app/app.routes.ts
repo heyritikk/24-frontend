@@ -5,6 +5,7 @@ import { LoginComponent } from './components/login/login.component';
 import { VerifyComponent } from './components/verify/verify.component';
 import { ManagerDashboardComponent } from './components/manager-dashboard/manager-dashboard.component';
 import { EmployeeDashboardComponent } from './components/employee-dashboard/employee-dashboard.component';
+import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { authGuard } from './guards/auth.guard';
  
 export const routes: Routes = [
@@ -17,10 +18,11 @@ export const routes: Routes = [
  
   { path: 'verify', component: VerifyComponent },
  
-  // 🔥 ADD THESE
   { path: 'manager-dashboard', component: ManagerDashboardComponent ,canActivate:[authGuard],data:{roles:['Manager']} },
  
   { path: 'employee-dashboard', component: EmployeeDashboardComponent,canActivate:[authGuard],data:{roles:['Employee']} },
+ 
+  { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [authGuard], data: { roles: ['Admin'] } },
  
   { path: '**', redirectTo: '' }
  
